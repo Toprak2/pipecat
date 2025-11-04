@@ -186,7 +186,6 @@ class MiniMaxHttpTTSService(TTSService):
         self._session = aiohttp_session
         self._model_name = model
         self._voice_id = voice_id
-        self._current_trace_id: Optional[str] = None
 
         # Create voice settings
         self._settings = {
@@ -353,9 +352,6 @@ class MiniMaxHttpTTSService(TTSService):
         """
         logger.debug(f"{self}: Generating TTS [{text}]")
 
-        # Reset trace_id for new request
-        self._current_trace_id = None
-
         headers = {
             "accept": "application/json, text/plain, */*",
             "Content-Type": "application/json",
@@ -389,30 +385,12 @@ class MiniMaxHttpTTSService(TTSService):
                         error_message = (
                             f"MiniMax TTS error: HTTP {response.status}, "
                             f"status_code={status_code}, status_msg={status_msg}, "
-                            f"trace_id={trace_id}"
                         )
-                        logger.error(
-                            error_message,
-                            extra={
-                                "trace_id": trace_id,
-                                "http_status": response.status,
-                                "status_code": status_code,
-                                "text_length": len(text),
-                            },
-                        )
+                        logger.error(error_message)
                     except Exception as parse_error:
                         # If parsing fails, use basic error message
-                        error_message = (
-                            f"MiniMax TTS error: HTTP {response.status}, trace_id={trace_id}"
-                        )
-                        logger.error(
-                            error_message,
-                            extra={
-                                "http_status": response.status,
-                                "trace_id": trace_id,
-                                "parse_error": str(parse_error),
-                            },
-                        )
+                        error_message = f"MiniMax TTS error: HTTP {response.status}"
+                        logger.error(error_message)
 
                     yield ErrorFrame(error=error_message)
                     return
@@ -448,20 +426,13 @@ class MiniMaxHttpTTSService(TTSService):
 
                                 if status_code != 0:
                                     # This is a non-streaming error response
-                                    # Use trace_id from header (already extracted above)
                                     status_msg = base_resp.get("status_msg", "Unknown error")
 
                                     error_message = (
-                                        f"MiniMax TTS API error: status_code={status_code}, "
-                                        f"status_msg={status_msg}, trace_id={self._current_trace_id}"
+                                        f"MiniMax TTS API error: status_code={status_code}"
+                                        f"status_msg={status_msg}"
                                     )
-                                    logger.error(
-                                        error_message,
-                                        extra={
-                                            "trace_id": self._current_trace_id,
-                                            "status_code": status_code,
-                                        },
-                                    )
+                                    logger.error(error_message)
                                     yield ErrorFrame(error=error_message)
                                     return
                             except (json.JSONDecodeError, UnicodeDecodeError):
@@ -499,31 +470,16 @@ class MiniMaxHttpTTSService(TTSService):
                                 status_msg = base_resp.get("status_msg", "Unknown error")
                                 error_message = (
                                     f"MiniMax TTS API error: status_code={status_code}, "
-                                    f"status_msg={status_msg}, trace_id={self._current_trace_id}"
+                                    f"status_msg={status_msg}"
                                 )
-                                logger.error(
-                                    error_message,
-                                    extra={
-                                        "trace_id": self._current_trace_id,
-                                        "status_code": status_code,
-                                    },
-                                )
+                                logger.error(error_message)
                                 yield ErrorFrame(error=error_message)
                                 return
 
                             # Handle final chunk with extra_info
                             if "extra_info" in data:
                                 extra_info = data.get("extra_info", {})
-                                logger.info(
-                                    f"MiniMax TTS completed successfully, trace_id={self._current_trace_id}",
-                                    extra={
-                                        "trace_id": self._current_trace_id,
-                                        "audio_length": extra_info.get("audio_length"),
-                                        "audio_size": extra_info.get("audio_size"),
-                                        "usage_characters": extra_info.get("usage_characters"),
-                                        "word_count": extra_info.get("word_count"),
-                                    },
-                                )
+                                logger.debug(f"Received final chunk with extra info: {extra_info}")
                                 continue  # No audio data in this block
 
                             # Extract audio data
@@ -534,13 +490,7 @@ class MiniMaxHttpTTSService(TTSService):
                             # Check for subtitle file (if subtitle generation is enabled)
                             subtitle_file = chunk_data.get("subtitle_file")
                             if subtitle_file:
-                                logger.info(
-                                    f"Subtitle file available: {subtitle_file}",
-                                    extra={
-                                        "trace_id": self._current_trace_id,
-                                        "subtitle_url": subtitle_file,
-                                    },
-                                )
+                                logger.info(f"Subtitle file available: {subtitle_file}")
 
                             audio_data = chunk_data.get("audio")
                             if not audio_data:
@@ -566,32 +516,23 @@ class MiniMaxHttpTTSService(TTSService):
                                 except ValueError as e:
                                     logger.error(
                                         f"Error converting hex to binary: {e}",
-                                        extra={"trace_id": self._current_trace_id},
                                     )
                                     continue
 
                         except json.JSONDecodeError as e:
                             logger.error(
                                 f"Error decoding JSON: {e}, data: {data_block[:100]}",
-                                extra={"trace_id": self._current_trace_id or "unknown"},
                             )
                             continue
 
         except aiohttp.ClientError as e:
             error_msg = f"MiniMax TTS network error: {str(e)}"
-            logger.exception(error_msg, extra={"trace_id": self._current_trace_id or "unknown"})
+            logger.exception(error_msg)
             yield ErrorFrame(error=error_msg)
         except Exception as e:
             error_msg = f"MiniMax TTS error: {str(e)}"
-            logger.exception(error_msg, extra={"trace_id": self._current_trace_id or "unknown"})
+            logger.exception(error_msg)
             yield ErrorFrame(error=error_msg)
         finally:
-            if self._current_trace_id:
-                logger.debug(
-                    f"MiniMax TTS request finished, trace_id={self._current_trace_id}, "
-                    f"received {chunk_count if 'chunk_count' in locals() else 0} chunks"
-                )
-            else:
-                logger.debug(f"MiniMax TTS request finished with no trace_id (no data received)")
             await self.stop_ttfb_metrics()
             yield TTSStoppedFrame()
