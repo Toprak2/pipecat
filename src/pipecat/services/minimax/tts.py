@@ -372,17 +372,7 @@ class MiniMaxHttpTTSService(TTSService):
             async with self._session.post(
                 self._base_url, headers=headers, json=payload
             ) as response:
-                # Extract trace_id from response header (available in all responses)
-                trace_id = (
-                    response.headers.get("Trace-Id")
-                    or response.headers.get("trace-id")
-                    or response.headers.get("X-Trace-Id")
-                    or "unknown"
-                )
-                self._current_trace_id = trace_id
-
-                # Log trace_id for all requests
-                logger.info(f"MiniMax TTS request trace_id={trace_id}, status={response.status}")
+                logger.trace(f"MiniMax TTS request status={response.status}")
 
                 if response.status != 200:
                     # Try to read error response body
@@ -430,9 +420,7 @@ class MiniMaxHttpTTSService(TTSService):
                 yield TTSStartedFrame()
 
                 # Process the streaming response
-                logger.debug(
-                    f"Starting to read streaming response, status={response.status}, trace_id={trace_id}"
-                )
+                logger.trace(f"Starting to read streaming response, status={response.status}")
                 buffer = bytearray()
 
                 CHUNK_SIZE = self.chunk_size
@@ -440,7 +428,7 @@ class MiniMaxHttpTTSService(TTSService):
 
                 async for chunk in response.content.iter_chunked(CHUNK_SIZE):
                     chunk_count += 1
-                    logger.debug(f"Received chunk #{chunk_count}, size={len(chunk)} bytes")
+                    logger.trace(f"Received chunk #{chunk_count}, size={len(chunk)} bytes")
                     if not chunk:
                         continue
 
@@ -448,7 +436,7 @@ class MiniMaxHttpTTSService(TTSService):
 
                     # Log raw buffer content for debugging
                     if chunk_count == 1:
-                        logger.debug(f"Raw buffer content: {buffer[:200]}")  # First 200 bytes
+                        logger.trace(f"Raw buffer content: {buffer[:200]}")  # First 200 bytes
 
                         # Check if first chunk is a direct JSON error (not streaming format)
                         if not buffer.startswith(b"data:"):
@@ -496,7 +484,7 @@ class MiniMaxHttpTTSService(TTSService):
 
                         try:
                             data_str = data_block[5:].decode("utf-8")
-                            logger.debug(
+                            logger.trace(
                                 f"Parsing data block: {data_str[:200]}..."
                             )  # Log first 200 chars
                             data = json.loads(data_str)
