@@ -123,6 +123,7 @@ class MiniMaxHttpTTSService(TTSService):
             pitch: Pitch adjustment (range: -12 to 12).
             emotion: Emotional tone (options: "happy", "sad", "angry", "fearful",
                 "disgusted", "surprised", "calm", "fluent").
+            english_normalization: Deprecated; use `text_normalization` instead
             text_normalization: Enable text normalization (Chinese/English).
             latex_read: Enable LaTeX formula reading.
             force_cbr: Enable Constant Bitrate (CBR) for audio encoding (MP3 only).
@@ -137,6 +138,7 @@ class MiniMaxHttpTTSService(TTSService):
         volume: Optional[float] = 1.0
         pitch: Optional[int] = 0
         emotion: Optional[str] = None
+        english_normalization: Optional[bool] = None  # Deprecated
         text_normalization: Optional[bool] = None
         latex_read: Optional[bool] = None
         force_cbr: Optional[bool] = None
@@ -248,6 +250,13 @@ class MiniMaxHttpTTSService(TTSService):
                 logger.warning(
                     f"Unsupported emotion: {params.emotion}. Supported emotions: {supported_emotions}"
                 )
+
+        # If `english_normalization`, add `text_normalization` and print warning
+        if params.english_normalization is not None:
+            logger.warning(
+                "Parameter `english_normalization` is deprecated and will be removed in a future version. Use `text_normalization` instead."
+            )
+            self._settings["voice_setting"]["text_normalization"] = params.english_normalization
 
         # Add text_normalization if provided (corrected parameter name)
         if params.text_normalization is not None:
