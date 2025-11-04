@@ -372,6 +372,7 @@ class MiniMaxHttpTTSService(TTSService):
                 logger.trace(f"MiniMax TTS request status={response.status}")
 
                 if response.status != 200:
+                    error_message = "MiniMax TTS error"
                     # Try to read error response body
                     try:
                         error_body = await response.text()
@@ -384,7 +385,7 @@ class MiniMaxHttpTTSService(TTSService):
 
                         error_message = (
                             f"MiniMax TTS error: HTTP {response.status}, "
-                            f"status_code={status_code}, status_msg={status_msg}, "
+                            f"status_code={status_code}, status_msg={status_msg}"
                         )
                         logger.error(error_message)
                     except Exception as parse_error:
