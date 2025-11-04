@@ -164,6 +164,7 @@ class MiniMaxHttpTTSService(TTSService):
             base_url: API base URL, defaults to MiniMax's T2A endpoint.
                 Global: https://api.minimax.io/v1/t2a_v2
                 Mainland China: https://api.minimaxi.chat/v1/t2a_v2
+                Western United States: https://api-uw.minimax.io/v1/t2a_v2
             group_id: MiniMax Group ID to identify project.
             model: TTS model name. Defaults to "speech-02-turbo". Options include:
                 "speech-2.6-hd", "speech-2.6-turbo" (latest, supports Filipino/Tamil/Persian),
