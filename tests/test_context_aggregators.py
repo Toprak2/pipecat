@@ -675,7 +675,7 @@ class BaseTestUserContextAggregator:
             # Aggregate assistant content.
             BotStartedSpeakingFrame(),
             LLMFullResponseStartFrame(),
-            TTSTextFrame(text="Hello, I'm your assistant"),
+            TTSTextFrame(text="Hello, I'm your assistant", aggregated_by="sentence"),
             SleepFrame(),
             # Interrupt the bot. Assistant content should be added first to the
             # context, followed by user content.
