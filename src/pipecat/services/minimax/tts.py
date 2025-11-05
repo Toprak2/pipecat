@@ -420,28 +420,6 @@ class MiniMaxHttpTTSService(TTSService):
                     if chunk_count == 1:
                         logger.trace(f"Raw buffer content: {buffer[:200]}")  # First 200 bytes
 
-                        # Check if first chunk is a direct JSON error (not streaming format)
-                        if not buffer.startswith(b"data:"):
-                            try:
-                                error_data = json.loads(buffer.decode("utf-8"))
-                                base_resp = error_data.get("base_resp", {})
-                                status_code = base_resp.get("status_code", 0)
-
-                                if status_code != 0:
-                                    # This is a non-streaming error response
-                                    status_msg = base_resp.get("status_msg", "Unknown error")
-
-                                    error_message = (
-                                        f"MiniMax TTS API error: status_code={status_code}"
-                                        f"status_msg={status_msg}"
-                                    )
-                                    logger.error(error_message)
-                                    yield ErrorFrame(error=error_message)
-                                    return
-                            except (json.JSONDecodeError, UnicodeDecodeError):
-                                # Not a valid JSON, continue with streaming processing
-                                pass
-
                     # Find complete data blocks
                     while b"data:" in buffer:
                         start = buffer.find(b"data:")
