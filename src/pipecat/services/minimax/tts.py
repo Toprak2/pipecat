@@ -352,7 +352,7 @@ class MiniMaxHttpTTSService(TTSService):
         """
         await super().start(frame)
         self._settings["audio_setting"]["sample_rate"] = self.sample_rate
-        logger.debug(f"MiniMax TTS initialized with sample_rate={self.sample_rate}")
+        logger.debug(f"MiniMax TTS initialized with sample_rate: {self.sample_rate}")
 
     @traced_tts
     async def run_tts(self, text: str) -> AsyncGenerator[Frame, None]:
