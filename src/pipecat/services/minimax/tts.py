@@ -238,7 +238,7 @@ class MiniMaxHttpTTSService(TTSService):
 
         # Add optional emotion if provided
         if params.emotion:
-            # Validate emotion is in the supported list (updated per official docs)
+            # Validate emotion is in the supported list
             supported_emotions = [
                 "happy",
                 "sad",
