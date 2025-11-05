@@ -49,6 +49,9 @@ reason")`.
 - `GeminiLiveLLMService` now properly supports context-provided system
   instruction and tools.
 
+- Improved `LocalSmartTurnAnalyzerV3` performance on systems with a low CPU
+  count.
+
 ## [0.0.92] - 2025-10-31 🎃 "The Haunted Edition" 👻
 
 ### Added
