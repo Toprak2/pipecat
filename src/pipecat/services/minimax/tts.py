@@ -258,9 +258,14 @@ class MiniMaxHttpTTSService(TTSService):
 
         # If `english_normalization`, add `text_normalization` and print warning
         if params.english_normalization is not None:
-            logger.warning(
-                "Parameter `english_normalization` is deprecated and will be removed in a future version. Use `text_normalization` instead."
-            )
+            import warnings
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("always")
+                warnings.warn(
+                    "Parameter `english_normalization` is deprecated and will be removed in a future version. Use `text_normalization` instead.",
+                    DeprecationWarning,
+                )
             self._settings["voice_setting"]["text_normalization"] = params.english_normalization
 
         # Add text_normalization if provided (corrected parameter name)
