@@ -775,6 +775,7 @@ class ElevenLabsHttpTTSService(WordTTSService):
             use_speaker_boost: Whether to use speaker boost enhancement.
             speed: Voice speed control (0.25 to 4.0).
             apply_text_normalization: Text normalization mode ("auto", "on", "off").
+            pronunciation_dictionary_locators: List of pronunciation dictionary locators to use.
         """
 
         language: Optional[Language] = None
@@ -785,6 +786,7 @@ class ElevenLabsHttpTTSService(WordTTSService):
         use_speaker_boost: Optional[bool] = None
         speed: Optional[float] = None
         apply_text_normalization: Optional[Literal["auto", "on", "off"]] = None
+        pronunciation_dictionary_locators: Optional[List[PronunciationDictionaryLocator]] = None
 
     def __init__(
         self,
@@ -843,6 +845,7 @@ class ElevenLabsHttpTTSService(WordTTSService):
         self.set_voice(voice_id)
         self._output_format = ""  # initialized in start()
         self._voice_settings = self._set_voice_settings()
+        self._pronunciation_dictionary_locators = params.pronunciation_dictionary_locators
 
         # Track cumulative time to properly sequence word timestamps across utterances
         self._cumulative_time = 0
@@ -1006,6 +1009,11 @@ class ElevenLabsHttpTTSService(WordTTSService):
 
         if self._voice_settings:
             payload["voice_settings"] = self._voice_settings
+
+        if self._pronunciation_dictionary_locators:
+            payload["pronunciation_dictionary_locators"] = [
+                locator.model_dump() for locator in self._pronunciation_dictionary_locators
+            ]
 
         if self._settings["apply_text_normalization"] is not None:
             payload["apply_text_normalization"] = self._settings["apply_text_normalization"]
