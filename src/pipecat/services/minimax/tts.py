@@ -124,6 +124,11 @@ class MiniMaxHttpTTSService(TTSService):
             emotion: Emotional tone (options: "happy", "sad", "angry", "fearful",
                 "disgusted", "surprised", "calm", "fluent").
             english_normalization: Deprecated; use `text_normalization` instead
+
+                .. deprecated:: 0.0.93
+                    The `english_normalization` parameter is deprecated and will be removed in a future version.
+                    Use the `text_normalization` parameter instead.
+
             text_normalization: Enable text normalization (Chinese/English).
             latex_read: Enable LaTeX formula reading.
             force_cbr: Enable Constant Bitrate (CBR) for audio encoding (MP3 only).
