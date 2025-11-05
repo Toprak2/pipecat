@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added `pronunciation_dictionary_locators` to `ElevenLabsTTSService`.
+
 - Added an asyncio event `finished_event` field to `InterruptionFrame`. When
   assigned, the asyncio event will be set when the frame reaches the end of the
   pipeline. You can use this field to know when an interruption made it all the
