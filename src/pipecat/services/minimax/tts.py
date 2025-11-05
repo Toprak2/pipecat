@@ -223,17 +223,6 @@ class MiniMaxHttpTTSService(TTSService):
             if service_lang:
                 self._settings["language_boost"] = service_lang
 
-                # Validate language-model compatibility
-                # Filipino, Tamil, Persian only supported by speech-2.6-* models
-                if params.language in {Language.FA, Language.FIL, Language.TA}:
-                    if not model.startswith("speech-2.6"):
-                        logger.warning(
-                            f"Language {params.language.value} ({service_lang}) is only supported by "
-                            f"speech-2.6-hd and speech-2.6-turbo models. "
-                            f"Current model '{model}' may not support this language. "
-                            f"Consider using 'speech-2.6-turbo' or 'speech-2.6-hd'."
-                        )
-
         # Add optional emotion if provided
         if params.emotion:
             # Validate emotion is in the supported list
