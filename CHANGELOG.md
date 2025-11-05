@@ -31,12 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   you cancel a task with `PipelineTask.cancel(reason="cancellation your
 reason")`.
 
+- In `MiniMaxHttpTTSService`:
+-- Added support for speech-2.6-hd and speech-2.6-turbo models
+-- Added languages: Afrikaans, Bulgarian, Catalan, Danish, Persian, Filipino, Hebrew,
+Croatian, Hungarian, Malay, Norwegian, Nynorsk, Slovak, Slovenian, Swedish, and Tamil
+-- Added new emotions: calm and fluent
+
 ### Fixed
 
 - Fixed `GeminiLiveLLMService` session resumption after a connection timeout.
 
 - `GeminiLiveLLMService` now properly supports context-provided system
   instruction and tools.
+
+### Deprecated
+
+- `english_normalization` input parameter for `MiniMaxHttpTTSService` is deprecated,
+use `test_normalization` instead.
 
 ## [0.0.92] - 2025-10-31 🎃 "The Haunted Edition" 👻
 
